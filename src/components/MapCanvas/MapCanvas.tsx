@@ -8,9 +8,11 @@ interface MapCanvasProps {
   storylines: Storyline[];
   selectedStoryline: Storyline | null;
   droneTarget: { lat: number; lng: number } | null;
+  mapCenter: { lat: number; lng: number };
+  droneNest: { lat: number; lng: number };
+  mapZoom: number;
 }
 
-const DRONE_NEST = { lat: 12.9680, lng: 77.5980 };
 const RISK_COLORS: Record<string, string> = {
   critical: "#ef4444",
   warning: "#f59e0b",
@@ -25,7 +27,15 @@ const TYPE_ICONS: Record<string, string> = {
   ROUTINE_PATROL: "✓",
 };
 
-export default function MapCanvas({ incidents, storylines, selectedStoryline, droneTarget }: MapCanvasProps) {
+export default function MapCanvas({
+  incidents,
+  storylines,
+  selectedStoryline,
+  droneTarget,
+  mapCenter,
+  droneNest,
+  mapZoom
+}: MapCanvasProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapInstance = useRef<any>(null);
@@ -65,16 +75,22 @@ export default function MapCanvas({ incidents, storylines, selectedStoryline, dr
       }
 
       const map = L.map(mapRef.current!, {
-        center: [12.9716, 77.595],
-        zoom: 15,
+        center: [mapCenter.lat, mapCenter.lng],
+        zoom: mapZoom,
         zoomControl: false,
         attributionControl: false,
       });
 
-      // Dark tile layer via CartoDB dark matter
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 19,
-        subdomains: "abcd",
+      // Premium Mapbox Tile Layer
+      const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+      const mapboxStyle = "mapbox/dark-v11";
+      const tileUrl = `https://api.mapbox.com/styles/v1/${mapboxStyle}/tiles/{z}/{x}/{y}@2x?access_token=${accessToken}`;
+
+      L.tileLayer(tileUrl, {
+        maxZoom: 22,
+        tileSize: 512,
+        zoomOffset: -1,
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a>',
       }).addTo(map);
 
       // Attribution minimal
@@ -137,7 +153,7 @@ export default function MapCanvas({ incidents, storylines, selectedStoryline, dr
         iconSize: [60, 32],
         iconAnchor: [30, 16],
       });
-      L.marker([DRONE_NEST.lat, DRONE_NEST.lng], { icon: nestIcon }).addTo(map);
+      L.marker([droneNest.lat, droneNest.lng], { icon: nestIcon }).addTo(map);
 
       mapInstance.current = map;
     }
@@ -153,7 +169,7 @@ export default function MapCanvas({ incidents, storylines, selectedStoryline, dr
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mapCenter.lat, mapCenter.lng, mapZoom]);
 
   // ── Pan to selected storyline ─────────────────────────────────────────────
   useEffect(() => {
@@ -182,11 +198,11 @@ export default function MapCanvas({ incidents, storylines, selectedStoryline, dr
       iconAnchor: [16, 16],
     });
 
-    const marker = L.marker([DRONE_NEST.lat, DRONE_NEST.lng], { icon: droneIcon }).addTo(mapInstance.current);
+    const marker = L.marker([droneNest.lat, droneNest.lng], { icon: droneIcon }).addTo(mapInstance.current);
     droneMarker.current = marker;
 
     // Draw path
-    const path = L.polyline([[DRONE_NEST.lat, DRONE_NEST.lng], [target.lat, target.lng]], {
+    const path = L.polyline([[droneNest.lat, droneNest.lng], [target.lat, target.lng]], {
       color: "hsl(195, 90%, 55%)",
       weight: 2,
       dashArray: "6 6",
@@ -206,15 +222,15 @@ export default function MapCanvas({ incidents, storylines, selectedStoryline, dr
         return;
       }
       const t = step / STEPS;
-      const lat = DRONE_NEST.lat + (target.lat - DRONE_NEST.lat) * t;
-      const lng = DRONE_NEST.lng + (target.lng - DRONE_NEST.lng) * t;
+      const lat = droneNest.lat + (target.lat - droneNest.lat) * t;
+      const lng = droneNest.lng + (target.lng - droneNest.lng) * t;
       marker.setLatLng([lat, lng]);
       setDroneProgress(Math.round(t * 100));
       step++;
       animFrame.current = requestAnimationFrame(() => setTimeout(tick, 30));
     };
     tick();
-  }, []);
+  }, [droneNest.lat, droneNest.lng]);
 
   useEffect(() => {
     if (droneTarget) animateDrone(droneTarget);

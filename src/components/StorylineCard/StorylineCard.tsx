@@ -11,6 +11,7 @@ interface StorylineCardProps {
   onDiscard: () => void;
   onDispatchDrone: () => void;
   isDroneLoading: boolean;
+  isLowConfidence: boolean;
 }
 
 const RISK_CONFIG: Record<RiskLevel, { label: string; icon: string }> = {
@@ -35,6 +36,7 @@ export default function StorylineCard({
   isDroneLoading,
 }: StorylineCardProps) {
   const [showNote, setShowNote] = useState(false);
+  const [showTrace, setShowTrace] = useState(false);
   const [note, setNote] = useState("");
   const risk = RISK_CONFIG[storyline.risk];
   const conf = CONFIDENCE_CONFIG[storyline.confidence];
@@ -58,6 +60,11 @@ export default function StorylineCard({
           <span className={styles.riskDot} />
           <span className={styles.riskLabel}>{risk.label}</span>
         </div>
+        {storyline.confidence_pct < 50 && (
+          <div className={styles.uncertaintyBadge} title="AI is unsure. Recommend manual verification.">
+            ⚠️ Low Confidence
+          </div>
+        )}
         <span className={styles.zone}>{storyline.zone}</span>
         <span className={styles.statusChip} data-status={storyline.status}>
           {storyline.status === "APPROVED" && "✓ Approved"}
@@ -90,6 +97,42 @@ export default function StorylineCard({
         <div className={styles.hypothesis}>
           <p className={styles.hypothesisLabel}>AI Hypothesis</p>
           <p className={styles.hypothesisText}>{storyline.hypothesis}</p>
+
+          {/* ── Signal Manifest (Evidence) ── */}
+          <div className={styles.manifest}>
+            <p className={styles.manifestLabel}>Raw Signal Manifest ({storyline.incident_ids.length})</p>
+            <div className={styles.manifestList}>
+              {storyline.incident_ids.map(id => (
+                <span key={id} className={styles.manifestTag}>{id}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Agent Trace ── */}
+          {storyline.agent_reasoning && storyline.agent_reasoning.length > 0 && (
+            <div className={styles.traceContainer}>
+              <button 
+                className={styles.traceToggle}
+                onClick={(e) => { e.stopPropagation(); setShowTrace(!showTrace); }}
+              >
+                {showTrace ? "Hide Agent Trace" : "View Agent Trace"} 
+                <span className={styles.traceIcon}>{showTrace ? "▴" : "▾"}</span>
+              </button>
+              
+              {showTrace && (
+                <div className={styles.traceLogs}>
+                  {storyline.agent_reasoning.map((step, idx) => (
+                    <div key={idx} className={styles.traceStep}>
+                      <span className={styles.traceDot} />
+                      <span className={styles.traceLine} />
+                      <span className={styles.traceText}>{step}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <p className={styles.recommendLabel}>Recommendation</p>
           <p className={styles.recommendText}>{storyline.ai_recommendation}</p>
 

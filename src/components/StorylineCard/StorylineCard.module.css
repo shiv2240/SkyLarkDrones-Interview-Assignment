@@ -73,6 +73,21 @@
 .riskBadge[data-risk="warning"]  .riskDot { background: var(--warning-dot); }
 .riskBadge[data-risk="info"]     .riskDot { background: var(--info-dot); }
 
+.uncertaintyBadge {
+  background: hsla(24, 100%, 50%, 0.15);
+  color: #ff8c00;
+  border: 1px solid hsla(24, 100%, 50%, 0.3);
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .zone {
   font-size: 11px;
   color: var(--text-muted);
@@ -173,6 +188,118 @@
   line-height: 1.7;
   font-style: italic;
 }
+
+.manifest {
+  margin: var(--space-1) 0 var(--space-2);
+}
+.manifestLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+  letter-spacing: 0.5px;
+}
+.manifestList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.manifestTag {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: var(--bg-base);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+}
+
+/* ── Agent Trace ── */
+.traceContainer {
+  margin: var(--space-2) 0 var(--space-1);
+}
+
+.traceToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color var(--transition-fast);
+}
+
+.traceToggle:hover {
+  color: var(--amber-400);
+}
+
+.traceIcon {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.traceLogs {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  padding-left: var(--space-2);
+  animation: slide-up 0.2s ease both;
+}
+
+.traceStep {
+  position: relative;
+  padding-left: var(--space-5);
+  padding-bottom: var(--space-3);
+  display: flex;
+  align-items: flex-start;
+}
+
+.traceStep:last-child {
+  padding-bottom: 0;
+}
+
+.traceDot {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber-500);
+  box-shadow: 0 0 8px var(--amber-glow);
+  z-index: 2;
+}
+
+.traceLine {
+  position: absolute;
+  left: 3px;
+  top: 12px;
+  width: 1px;
+  height: calc(100% - 6px);
+  background: var(--border-subtle);
+  z-index: 1;
+}
+
+.traceStep:last-child .traceLine {
+  display: none;
+}
+
+.traceText {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  font-family: var(--font-mono);
+  opacity: 0.85;
+}
+
 
 /* ── Drone Result Panel ── */
 .droneResult {

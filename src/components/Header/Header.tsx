@@ -1,4 +1,12 @@
+import SiteSelector from "@/components/SiteSelector/SiteSelector";
 import styles from "./Header.module.css";
+
+interface Site {
+  id: string;
+  name: string;
+  label: string;
+  city: string;
+}
 
 interface HeaderProps {
   operator: string;
@@ -7,27 +15,18 @@ interface HeaderProps {
   pendingCount: number;
   approvedCount: number;
   onOpenBriefing: () => void;
+  sites: Site[];
+  activeSiteId: string;
+  onSiteChange: (siteId: string) => void;
+  isSiteLoading: boolean;
 }
 
 export default function Header({
-  operator,
-  site,
-  generatedAt,
-  pendingCount,
-  approvedCount,
-  onOpenBriefing,
+  operator, site, generatedAt, pendingCount, approvedCount,
+  onOpenBriefing, sites, activeSiteId, onSiteChange, isSiteLoading,
 }: HeaderProps) {
   const time = new Date(generatedAt).toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Asia/Kolkata",
-  });
-
-  const now = new Date().toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    timeZone: "Asia/Kolkata",
+    hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata",
   });
 
   return (
@@ -51,6 +50,16 @@ export default function Header({
         </div>
       </div>
 
+      {/* ── Site Selector ── */}
+      <div className={styles.siteSelectorWrap}>
+        <SiteSelector
+          sites={sites}
+          activeSiteId={activeSiteId}
+          onChange={onSiteChange}
+          isLoading={isSiteLoading}
+        />
+      </div>
+
       <div className={styles.meta}>
         <div className={styles.metaItem}>
           <span className={styles.metaLabel}>Operator</span>
@@ -60,11 +69,6 @@ export default function Header({
         <div className={styles.metaItem}>
           <span className={styles.metaLabel}>AI Analysis At</span>
           <span className={styles.metaValue}>{time} IST</span>
-        </div>
-        <div className={styles.divider} />
-        <div className={styles.metaItem}>
-          <span className={styles.metaLabel}>Current Time</span>
-          <span className={`${styles.metaValue} ${styles.liveClock}`}>{now}</span>
         </div>
       </div>
 

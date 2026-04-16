@@ -38,14 +38,28 @@ export default function BriefingDrawer({
   const getBriefingText = () => {
     const lines = [
       `MORNING SECURITY BRIEF – ${dateStr.toUpperCase()}`,
-      `Prepared by: ${operator} | ${site}`,
-      `Generated at: ${timeStr} IST`,
+      `To: Nisha (Site Head) | From: ${operator} (Ops Lead)`,
+      `Generated at: ${timeStr} IST | 8:00 AM Briefing Readiness: 100%`,
       `${"─".repeat(60)}`,
       ``,
-      `OVERNIGHT SUMMARY:`,
-      `${approvedStorylines.length} storyline(s) reviewed and cleared.`,
+      `EXECUTIVE SUMMARY:`,
+      `The overnight signals have been Triaged by the 6:10 Assistant.`,
+      `${approvedStorylines.length} key storylines were investigated, verified, and cleared for the 8:00 AM review.`,
       ``,
+      `WHAT HAPPENED & WHAT MATTERS:`,
     ];
+    
+    // Auto-generate a "What Matters" executive insight
+    const criticals = approvedStorylines.filter(s => s.risk === "critical").length;
+    const warnings = approvedStorylines.filter(s => s.risk === "warning").length;
+    
+    lines.push(`>> ACTIONABLE CO-ORDINATION SUMMARY:`);
+    lines.push(`   • CRITICAL ANOMALIES: ${criticals}`);
+    lines.push(`   • POTENTIAL RISKS: ${warnings}`);
+    lines.push(`   • STATUS: Maya has reviewed all signals. Drone recon is documented below.`);
+    lines.push(``);
+    lines.push(`${"─".repeat(60)}`);
+    lines.push(``);
 
     approvedStorylines.forEach((s, i) => {
       lines.push(`[${i + 1}] ${s.title} (${s.zone})`);
