@@ -1,0 +1,336 @@
+.card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: border-color var(--transition-base), background var(--transition-base), box-shadow var(--transition-base);
+  animation: fade-in 0.3s ease both;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.card.critical::before { background: var(--critical-dot); }
+.card.warning::before  { background: var(--warning-dot); }
+.card.info::before     { background: var(--info-dot); }
+
+.card:hover:not(.terminal) {
+  border-color: var(--border-default);
+  background: var(--bg-elevated);
+}
+
+.card.selected {
+  border-color: var(--amber-500);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 1px var(--amber-glow), 0 4px 24px hsla(0,0%,0%,0.3);
+}
+
+.card.terminal {
+  cursor: default;
+  opacity: 0.65;
+}
+
+/* ── Header ── */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.riskBadge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px var(--space-2);
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  flex-shrink: 0;
+}
+
+.riskBadge[data-risk="critical"] { background: var(--critical-bg); color: var(--critical-text); border: 1px solid var(--critical-border); }
+.riskBadge[data-risk="warning"]  { background: var(--warning-bg);  color: var(--warning-text);  border: 1px solid var(--warning-border); }
+.riskBadge[data-risk="info"]     { background: var(--info-bg);     color: var(--info-text);     border: 1px solid var(--info-border); }
+
+.riskDot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+}
+
+.riskBadge[data-risk="critical"] .riskDot { background: var(--critical-dot); }
+.riskBadge[data-risk="warning"]  .riskDot { background: var(--warning-dot); }
+.riskBadge[data-risk="info"]     .riskDot { background: var(--info-dot); }
+
+.zone {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: var(--space-1);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusChip {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+.statusChip[data-status="NEEDS_REVIEW"]    { background: var(--bg-overlay); color: var(--text-muted); }
+.statusChip[data-status="APPROVED"]        { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+.statusChip[data-status="DISCARDED"]       { background: var(--bg-overlay); color: var(--text-disabled); }
+.statusChip[data-status="DRONE_DISPATCHED"]{ background: var(--drone-glow); color: var(--drone-active); border: 1px solid var(--drone-active); animation: blink 1s ease-in-out infinite; }
+.statusChip[data-status="DRONE_RETURNED"]  { background: var(--success-bg); color: var(--success-text); }
+
+/* ── Title ── */
+.title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+  letter-spacing: -0.2px;
+}
+
+/* ── Confidence bar ── */
+.confidenceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.confidenceLabel {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.barTrack {
+  flex: 1;
+  height: 3px;
+  background: var(--bg-overlay);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.barFill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.confidencePct {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* ── Hypothesis block ── */
+.hypothesis {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+  animation: slide-up 0.25s ease both;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.hypothesisLabel, .recommendLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+.hypothesisText {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-base);
+  border-left: 2px solid var(--border-default);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+.recommendText {
+  font-size: 13px;
+  color: var(--amber-300);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+/* ── Drone Result Panel ── */
+.droneResult {
+  background: hsla(195, 30%, 12%, 0.8);
+  border: 1px solid hsla(195, 60%, 40%, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  animation: slide-up 0.3s ease both;
+}
+.droneResultHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.droneResultIcon { font-size: 16px; }
+.droneResultTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--drone-active);
+  flex: 1;
+}
+.droneResultConf {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid var(--drone-active);
+  color: var(--drone-active);
+  background: var(--drone-glow);
+}
+.droneResultText {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: var(--space-3);
+}
+.droneStats {
+  display: flex;
+  gap: var(--space-4);
+}
+.droneStat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.droneStatLabel {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font-mono);
+}
+.droneStatValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+/* ── Note Input ── */
+.noteInput {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.noteLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.noteTextarea {
+  background: var(--bg-base);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  resize: vertical;
+  line-height: 1.5;
+  transition: border-color var(--transition-fast);
+}
+.noteTextarea:focus {
+  outline: none;
+  border-color: var(--amber-500);
+}
+
+/* ── Action buttons ── */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.btnApprove, .btnDrone, .btnDiscard, .btnCancel {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.btnApprove {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
+}
+.btnApprove:hover { background: hsla(155, 60%, 40%, 0.2); border-color: var(--success-dot); }
+
+.btnDrone {
+  background: var(--drone-glow);
+  color: var(--drone-active);
+  border: 1px solid hsla(195, 90%, 55%, 0.4);
+}
+.btnDrone:hover:not(:disabled) { background: hsla(195, 90%, 55%, 0.25); }
+.btnDrone:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btnDiscard {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+}
+.btnDiscard:hover { color: var(--critical-text); border-color: var(--critical-border); }
+
+.btnCancel {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+}
+
+.spinner {
+  width: 12px; height: 12px;
+  border: 2px solid hsla(195, 90%, 55%, 0.3);
+  border-top-color: var(--drone-active);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+/* ── Footer ── */
+.approvedNote {
+  margin-top: var(--space-2);
+  font-size: 12px;
+  color: var(--success-text);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.incidentCount {
+  margin-top: var(--space-2);
+  font-size: 11px;
+  color: var(--text-disabled);
+  font-family: var(--font-mono);
+}

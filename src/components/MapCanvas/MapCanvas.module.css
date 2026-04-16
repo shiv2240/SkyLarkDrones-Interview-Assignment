@@ -1,0 +1,182 @@
+.wrapper {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-void);
+}
+
+/* ── Marker styles ─────────────────────────────────────────────────────────── */
+.mapMarker {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.markerDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--marker-color, #f59e0b);
+  box-shadow: 0 0 0 2px hsla(0,0%,100%,0.1), 0 0 12px var(--marker-color, #f59e0b);
+  z-index: 2;
+  position: relative;
+}
+
+.markerRing {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--marker-color, #f59e0b);
+  opacity: 0.4;
+  animation: pulse-ring 2s ease-out infinite;
+  z-index: 1;
+}
+
+.markerLabel {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: hsla(220, 20%, 8%, 0.9);
+  border: 1px solid hsla(220, 14%, 26%, 0.8);
+  color: hsl(210, 20%, 88%);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 99px;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* ── Popup styles ─── */
+:global(.leaflet-popup-content-wrapper) {
+  background: hsl(220, 18%, 11%) !important;
+  border: 1px solid hsl(220, 14%, 22%) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 32px hsla(0,0%,0%,0.5) !important;
+  padding: 0 !important;
+}
+:global(.leaflet-popup-tip) {
+  background: hsl(220, 18%, 11%) !important;
+}
+:global(.leaflet-popup-content) {
+  margin: 0 !important;
+}
+:global(.leaflet-popup-close-button) {
+  color: hsl(215, 14%, 68%) !important;
+}
+
+/* ── Nest marker ── */
+.nestMarker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: hsla(220, 18%, 14%, 0.9);
+  border: 1px solid hsl(220, 14%, 26%);
+  border-radius: 99px;
+  padding: 3px 8px;
+  font-size: 13px;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+}
+.nestLabel {
+  font-size: 9px;
+  color: hsl(215, 14%, 68%);
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* ── Drone marker ── */
+.droneMarker {
+  font-size: 22px;
+  filter: drop-shadow(0 0 8px hsl(195, 90%, 55%));
+  animation: glow-pulse 1s ease-in-out infinite;
+  user-select: none;
+}
+
+/* ── Drone HUD ── */
+.droneHud {
+  position: absolute;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: hsla(195, 20%, 10%, 0.92);
+  border: 1px solid hsla(195, 90%, 55%, 0.4);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  animation: slide-up 0.3s ease both;
+  min-width: 240px;
+}
+
+.droneHud.flying { border-color: hsla(195, 90%, 55%, 0.5); }
+.droneHud.landed { border-color: hsla(155, 60%, 45%, 0.4); background: hsla(155, 20%, 10%, 0.92); }
+
+.droneEmoji { font-size: 22px; }
+.hudInfo { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.hudTitle { font-size: 12px; font-weight: 600; color: var(--drone-active); }
+.hudBar { height: 3px; background: hsla(195, 90%, 55%, 0.2); border-radius: 99px; overflow: hidden; }
+.hudFill { height: 100%; background: var(--drone-active); border-radius: 99px; transition: width 0.2s ease; }
+.hudPct { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); }
+
+/* ── Grid overlay (aesthetic) ── */
+.gridOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, hsla(220, 50%, 60%, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, hsla(220, 50%, 60%, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  z-index: 500;
+}
+
+/* ── Legend ── */
+.legend {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  background: hsla(220, 18%, 9%, 0.88);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 140px;
+}
+.legendTitle {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-bottom: var(--space-1);
+}
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 11px;
+}
+.legendLabel {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
