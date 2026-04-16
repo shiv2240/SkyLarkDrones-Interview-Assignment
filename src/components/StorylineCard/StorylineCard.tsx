@@ -11,7 +11,6 @@ interface StorylineCardProps {
   onDiscard: () => void;
   onDispatchDrone: () => void;
   isDroneLoading: boolean;
-  isLowConfidence: boolean;
 }
 
 const RISK_CONFIG: Record<RiskLevel, { label: string; icon: string }> = {

@@ -75,7 +75,7 @@ async function synthesizeIntelligence(
     CRITICAL CONTEXT: "${raghavNote}"
     
     RAW SIGNALS:
-    ${incidents.map((i) => `ID:${i.id} | Time:${i.time} | Type:${i.type} | Zone:${i.zone} | Detail:${i.detail}`).join("\n")}
+    ${incidents.map((i) => `ID:${i.id} | Time:${i.timestamp} | Type:${i.type} | Zone:${i.zone} | Detail:${i.description}`).join("\n")}
     
     TASK:
     1. Group related signals into meaningful "Storylines".
