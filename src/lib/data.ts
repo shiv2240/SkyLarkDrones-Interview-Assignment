@@ -1,5 +1,5 @@
 // ─── Simulated Multi-Site Data Layer ─────────────────────────────────────────
-// Each site has its own geo-center, drone nest, incidents, storylines, and employees.
+// Each site has its own geo-center, drone nest, incidents, and employees.
 // In production, this would be fetched from a PostGIS database per site_id.
 
 export type IncidentType =
@@ -107,11 +107,9 @@ const SITE_BANGALORE: SiteConfig = {
     { id: "BLR-008", type: "BADGE_FAILURE", timestamp: "2024-11-15T05:10:00Z", lat: 12.9708, lng: 77.5935, zone: "Admin Block – Main Gate", description: "Badge BD-4471 attempted admin block entry. Arjun (Logistics) has no night clearance.", metadata: { badge_id: "BD-4471", reader_id: "RDR-ADM-01", attempt_count: 1 } },
   ],
 
-
-
   droneReconResults: {
     "STY-BLR-001": { report: "Drone thermal scan of Block C service road complete. Single white utility van (partial plate: KA-05) confirmed stationary near Maintenance Hatch 3. No unauthorized personnel visible outside the vehicle. Maintenance access panel appears to be open. Consistent with an emergency pipe inspection.", imageSrc: "", thermal_anomaly: false, personnel_detected: 0, vehicles_detected: 1, confidence: "high" },
-    "STY-BLR-002": { report: "Drone recon of Gate 7 perimeter complete. No personnel or ground vehicles detected. Airspace scan at 50m radius returned clear. PIR trigger may have been caused by thermal updraft or large avian. No structural breach of perimeter fence detected.", imageSrc: "", thermal_anomaly: false, personnel_detected: 0, vehicles_detected: 0, confidence: "medium" },
+    "STY-BLR-002": { report: "Drone recon of Gate 7 perimeter complete. No personnel or vehicles in approach corridor. Airspace scan at 50m radius returned clear. PIR trigger may have been caused by thermal updraft or large avian. No structural breach of perimeter fence detected.", imageSrc: "", thermal_anomaly: false, personnel_detected: 0, vehicles_detected: 0, confidence: "medium" },
   },
 };
 
@@ -139,8 +137,9 @@ const SITE_CHENNAI: SiteConfig = {
     { id: "CHE-001", type: "VEHICLE_MOTION", timestamp: "2024-11-15T01:22:00Z", lat: 13.0831, lng: 80.2894, zone: "Truck Bay – Gate B", description: "Unregistered truck entered truck bay via Gate B at 01:22 AM. CCTV timestamp synced.", metadata: { camera_id: "CAM-TB-02", plate: "TN09-AX-7791" } },
     { id: "CHE-002", type: "BADGE_FAILURE", timestamp: "2024-11-15T01:25:00Z", lat: 13.0829, lng: 80.289, zone: "Cold Storage – Bay 4 Entry", description: "Badge CH-7712 (Murugan Pillai, Transport) attempted cold storage entry. Transport staff have no cold storage authorization.", metadata: { badge_id: "CH-7712", reader_id: "RDR-CS-04", attempt_count: 2 } },
     { id: "CHE-003", type: "FENCE_ALERT", timestamp: "2024-11-15T01:28:00Z", lat: 13.0826, lng: 80.2888, zone: "Cold Storage – South Fence", description: "Fence sensor triggered near Bay 4 perimeter. 2 pulses detected in 6 seconds.", metadata: { sensor_id: "FEN-CS-S-02", pulse_count: 2 } },
-    { id: "CHE-004", type: "ROUTINE_PATROL", timestamp: "2024-11-15T00:00:00Z", lat: 13.0822, lng: 80.2908, zone: "Lor a person surveying the gate without entry. Isolated, no supporting signals.", confidence: "low", confidence_pct: 31, incident_ids: ["CHE-006"], ai_recommendation: "Low-confidence event. Recommend drone sweep of Gate C north approach before 7:00 AM." },
-    { id: "STY-CHE-003", title: "Dock & West Wall Patrols – Clear", zone: "Loading Dock / West Wall", lat: 13.0821, lng: 80.2911, risk: "info", status: "NEEDS_REVIEW", hypothesis: "Both scheduled patrol routes completed without incident. All 7 shipping containers remain sealed. West wall lighting is operational.", confidence: "high", confidence_pct: 98, incident_ids: ["CHE-004", "CHE-005"], ai_recommendation: "No action required. Safe to include as 'All Clear' in morning briefing for operations head." },
+    { id: "CHE-004", type: "ROUTINE_PATROL", timestamp: "2024-11-15T00:00:00Z", lat: 13.0822, lng: 80.2908, zone: "Loading Dock – North", description: "Nightly dock inspection completed. All 7 shipping containers verified sealed.", metadata: { guard_id: "SEC-04", containers_checked: 7 } },
+    { id: "CHE-005", type: "ROUTINE_PATROL", timestamp: "2024-11-15T03:00:00Z", lat: 13.0820, lng: 80.2915, zone: "Perimeter – West Wall", description: "West wall patrol complete. No anomalies. Lighting operational.", metadata: { guard_id: "SEC-09", patrol_route: "West-Loop" } },
+    { id: "CHE-006", type: "PERIMETER_BREACH", timestamp: "2024-11-15T04:10:00Z", lat: 13.0835, lng: 80.2905, zone: "Gate C – North Entry", description: "Motion sensor at Gate C triggered twice. No vehicle or badge event followed.", metadata: { sensor_id: "PIR-GC-N1", duration_seconds: 5 } },
   ],
 
   droneReconResults: {
@@ -176,8 +175,6 @@ const SITE_PUNE: SiteConfig = {
     { id: "PUN-004", type: "BADGE_FAILURE", timestamp: "2024-11-15T04:55:00Z", lat: 18.5198, lng: 73.8572, zone: "Machine Room B – Entry", description: "Badge PUN-1177 (Ravi Kulkarni, Engineering) badged in at Machine Room B 2h before shift start.", metadata: { badge_id: "PUN-1177", reader_id: "RDR-MRB-01", attempt_count: 1 } },
     { id: "PUN-005", type: "ROUTINE_PATROL", timestamp: "2024-11-15T01:30:00Z", lat: 18.5196, lng: 73.858, zone: "Cafeteria – Ground Floor", description: "Routine patrol of public zones complete. Cafeteria locked, no anomalies.", metadata: { guard_id: "G-07", patrol_route: "Public-Loop" } },
   ],
-
-
 
   droneReconResults: {
     "STY-PUN-001": { report: "Drone thermal scan of Sigma-2 roofline complete. Rooftop HVAC unit C3 is running 6°C above normal operating temperature. Possible compressor overheat or refrigerant leak. No visible external breach or structural damage. Recommend chemical safety inspection of HVAC unit C3 before 8 AM. No personnel on roof.", imageSrc: "", thermal_anomaly: true, personnel_detected: 0, vehicles_detected: 0, confidence: "high" },
