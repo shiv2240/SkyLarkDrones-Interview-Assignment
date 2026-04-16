@@ -142,7 +142,7 @@
     linear-gradient(to right, hsla(220, 50%, 60%, 0.03) 1px, transparent 1px),
     linear-gradient(to bottom, hsla(220, 50%, 60%, 0.03) 1px, transparent 1px);
   background-size: 50px 50px;
-  z-index: 500;
+  z-index: 50; /* Lowered from 500 to stay behind legend and HUD */
 }
 
 /* ── Legend ── */
@@ -154,7 +154,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: var(--space-3);
-  z-index: 1000;
+  z-index: 400; /* Above grid (50) but below Drawer (500) */
   backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;

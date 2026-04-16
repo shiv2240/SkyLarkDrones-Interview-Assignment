@@ -8,7 +8,7 @@
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
   position: relative;
-  z-index: 100;
+  z-index: 1100; /* Above all panels and map overlays */
   gap: var(--space-4);
 }
 
@@ -16,6 +16,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.siteSelectorWrap {
   flex-shrink: 0;
 }
 
