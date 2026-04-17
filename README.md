@@ -4,38 +4,51 @@
 
 The **6:10 Assistant** is a high-stakes, AI-native intelligence platform designed for Ridgeway Site. It empowers Maya, the Operations Lead, to move from a mess of overnight signals to a trusted morning decision in under two hours.
 
+---
+
+## 🚀 Unified Operation Launch
+The entire platform (Frontend, Backend, and Database Studio) is orchestrated into a single command. 
+
+1. **Install Root Dependencies**: `npm install`
+2. **Setup Server**: `cd server && npm install`
+3. **Database Readiness**: `npm --prefix server run prisma:generate`
+4. **Launch Synchronized Stack**:
+   ```bash
+   npm run dev
+   ```
+   *This launches the API (3001), UI (3000), and Prisma Studio (5555) in a single color-coded terminal.*
+
+---
+
+## 🔐 Testing Credentials
+
+| Persona | Email | Security Key (Password) | Role |
+| :--- | :--- | :--- | :--- |
+| **Maya (Operator)** | `maya@ridgeway.com` | `operator123` | Investigative Lead |
+| **Nisha (Site Head)** | `nisha@ridgeway.com` | `manager123` | Executive Reviewer |
+
+---
+
 ## 📖 The Story
 Every morning, the site "knows" something happened, but nobody knows the full story. Between raw logs and Maya’s 8:00 AM briefing for Site Head Nisha, there is a gap of uncertainty. This platform fills that gap by deploying an **Autonomous Intelligence Agent** that investigates context, correlates signals, and drafts the morning truth.
 
 ---
 
-## 🚀 Key Features
-
-### 🕵️‍♂️ AI-First Investigation
-Unlike traditional dashboards, the "6:10 Assistant" performs **Deep Synthesis** before the user logs in. Powered by **Groq (Llama-3.3-70b)**, the system correlates fence alerts, badge failures, and drone missions into cohesive narrative "Storylines."
-
-### 🚁 Lightweight Agent & Drone Simulation
-The system features a real Agent that decides when a situation warrants verification.
-- **Dispatch Drone**: Simulated recon missions return thermal data, personnel counts, and visual confirmations.
-- **Badge Lookup**: Agentic tool-calling to verify if "Raghav" or "Arjun" were authorized for specific zones.
-
-### 🗺️ Spatial Intelligence
-A high-resolution **Mapbox GL** interface is the core of the workflow. The system pans and zooms Maya to the exact epicenter of an incident cluster, providing 1:1 spatial context for every AI hypothesis.
-
-### 🛡️ Human-in-the-Loop Review
-Maya is always in control. She can:
-- **Inspect Agent Trace**: View the step-by-step logic the AI used to correlate signals.
-- **Override Hypotheses**: Discard noise or approve critical events.
-- **Finalize the Briefing**: Compile a professional summary for the 8:00 AM meeting with Nisha.
+## 🕵️‍♂️ Key Features
+- **AI-First Investigation**: Powered by **Groq (Llama-3.3-70b)**, performing sub-second correlation of raw signals into "Storylines."
+- **Spatial Intelligence**: High-density **Mapbox GL** interface linked 1:1 with physical sensor coordinates.
+- **Drone Simulation**: Imperative flight simulation for real-time thermal/visual recon.
+- **Agent Trace**: Full transparency into the AI's step-by-step logic (investigative breadcrumbs).
+- **Morning Briefing**: Human-in-the-loop compiler that drafts the summary for the 8:00 AM meeting.
 
 ---
 
-## 🛠 Tech Stack
-- **Framework**: Next.js 16 (App Router, TypeScript)
-- **AI Engine**: Groq SDK (Llama-3.3-70b-versatile) for sub-second inference.
-- **Mapping**: react-leaflet + Mapbox Vector/Raster Tiles.
-- **Styling**: Vanilla CSS (Industrial Dark Mode, Glassmorphism).
-- **Icons**: Custom SVG + Lucide-react.
+## 🛠 Multi-Tier Architecture
+- **Frontend**: Next.js 16 (App Router, TypeScript, Framer Motion).
+- **Backend**: Node.js + Express (Strongly-typed Intelligence Service).
+- **Database**: Prisma ORM with SQLite (Fast, portable, and production-ready for industrial edge).
+- **Mapping**: Leaflet + Mapbox Vector Tiles + Custom Industrial Styling.
+- **AI**: Groq Llama-3 (Cloud Inference) for sub-second synthesis.
 
 ---
 
@@ -43,42 +56,15 @@ Maya is always in control. She can:
 
 | Requirement | Implementation Detail |
 | :--- | :--- |
-| **AI-First Workflow** | Dynamic correlation of 8+ raw signals into 4 investigate narratives on load. |
-| **Simple Agent** | Centralized triage logic that decides between "Harmless" closure and "Recon" escalation. |
+| **AI-First Workflow** | Dynamic correlation of raw signals into investigate narratives on load. |
+| **Simple Agent** | Centralized triage logic that handles tool-calling and escalation. |
 | **MCP-Style Tools** | Tool-router architecture for `dispatch_drone` and `lookup_employee`. |
-| **Spatial Interface** | Meaningful Mapbox integration synced with the narrative sidebar. |
-| **Drone Simulation** | Flight simulation with real-time recon results (Thermal/Personnel/Vehicles). |
-| **Review Layer** | Custom "Agent Trace" component and Morning Briefing compiler. |
-
----
-
-## 🏗 Setup & Installation
-
-1. **Clone the repository**
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-3. **Set up Environment Variables (`.env.local`)**:
-   ```env
-   GROQ_API_KEY=your_key_here
-   NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
-   ```
-4. **Run Development Server**:
-   ```bash
-   npm run dev
-   ```
-
----
-
-## 🤖 AI-Powered Development Methodology
-This project was built using an **AI-Native Workflow**. 
-- **Agentic Coding**: Used specialized AI agents to handle the migration from Gemini to Groq while maintaining type safety.
-- **Iterative Refinement**: Leveraged AI for industrial UI design and complex spatial logic synchronization.
-- **Deep Synthesis**: The core "Investigation Engine" in `route.ts` was designed using prompt-engineering techniques to ensure the AI surfaces "Uncertainty" rather than making "Confident Guesses."
+| **Spatial Interface** | Precision Mapbox integration synchronized with Storyline navigation. |
+| **Drone Simulation** | Real-time flight paths with deterministic recon results. |
+| **Unified Launch** | Single-command orchestration for the entire frontend/backend stack. |
 
 ---
 
 *Founding Full Stack Engineer Submission*  
 **Ridgeway Site Operations Center**  
-*6:10 AM | Generated for Nisha (Site Head)*
+**SkyLark Drones Review Team** 

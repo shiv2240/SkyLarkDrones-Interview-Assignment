@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -n \"SERVER,FRONTEND,PRISMA\" -c \"bgBlue.bold,bgGreen.bold,bgMagenta.bold\" \"npm run dev:server\" \"npm run dev:frontend\" \"npm run dev:db\"",
+    "dev:frontend": "next dev",
+    "dev:server": "npm --prefix server run dev",
+    "dev:db": "npm --prefix server run studio",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -15,11 +18,9 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^1.8.0",
     "next": "16.2.4",
-    "openai": "^6.34.0",
-    "pdf-parse": "^2.4.5",
-    "pdfjs-dist": "^5.6.205",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-joyride": "^3.0.2",
     "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
@@ -27,6 +28,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",

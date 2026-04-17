@@ -37,8 +37,8 @@ export default function StorylineCard({
   const [showNote, setShowNote] = useState(false);
   const [showTrace, setShowTrace] = useState(false);
   const [note, setNote] = useState("");
-  const risk = RISK_CONFIG[storyline.risk];
-  const conf = CONFIDENCE_CONFIG[storyline.confidence];
+  const risk = RISK_CONFIG[storyline.risk as RiskLevel] || RISK_CONFIG.info;
+  const conf = CONFIDENCE_CONFIG[storyline.confidence as ConfidenceLevel] || CONFIDENCE_CONFIG.medium;
 
   const isTerminal =
     storyline.status === "APPROVED" || storyline.status === "DISCARDED";

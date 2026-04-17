@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, memo } from "react";
 import { Incident, Storyline } from "@/lib/data";
 import styles from "./MapCanvas.module.css";
 
@@ -27,7 +27,7 @@ const TYPE_ICONS: Record<string, string> = {
   ROUTINE_PATROL: "✓",
 };
 
-export default function MapCanvas({
+const MapCanvas = memo(({
   incidents,
   storylines,
   selectedStoryline,
@@ -35,7 +35,7 @@ export default function MapCanvas({
   mapCenter,
   droneNest,
   mapZoom
-}: MapCanvasProps) {
+}: MapCanvasProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapInstance = useRef<any>(null);
@@ -46,33 +46,20 @@ export default function MapCanvas({
   const animFrame = useRef<number>(0);
   const [droneProgress, setDroneProgress] = useState(0);
   const [isDroneFlying, setIsDroneFlying] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
 
   // ── Init Leaflet ──────────────────────────────────────────────────────────
   useEffect(() => {
-    // Guard: if a Leaflet instance already exists on this container (React Strict
-    // Mode double-invocation), remove it first before re-initialising.
-    if (mapInstance.current) {
-      mapInstance.current.remove();
-      mapInstance.current = null;
-    }
-
     let cancelled = false;
 
     async function initMap() {
+      // If we already have a map, don't re-init, just return
+      if (mapInstance.current) return;
+
       const L = (await import("leaflet")).default;
       await import("leaflet/dist/leaflet.css");
 
-      // Another guard for the async gap — effect may have been cleaned up
-      // while the dynamic imports were in flight.
       if (cancelled || !mapRef.current) return;
-
-      // Leaflet attaches `_leaflet_id` to the DOM node after initialisation.
-      // If it's already set (e.g. HMR re-run), remove the stale instance first.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((mapRef.current as any)._leaflet_id) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (mapRef.current as any)._leaflet_id = undefined;
-      }
 
       const map = L.map(mapRef.current!, {
         center: [mapCenter.lat, mapCenter.lng],
@@ -81,107 +68,106 @@ export default function MapCanvas({
         attributionControl: false,
       });
 
-      // Premium Mapbox Tile Layer
       const accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-      const mapboxStyle = "mapbox/dark-v11";
-      const tileUrl = `https://api.mapbox.com/styles/v1/${mapboxStyle}/tiles/{z}/{x}/{y}@2x?access_token=${accessToken}`;
+      const tileUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}@2x?access_token=${accessToken}`;
 
       L.tileLayer(tileUrl, {
         maxZoom: 22,
         tileSize: 512,
         zoomOffset: -1,
-        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a>',
+        attribution: 'Mapbox',
       }).addTo(map);
 
-      // Attribution minimal
-      L.control.attribution({ position: "bottomright", prefix: "" }).addTo(map);
-
-      // ── Draw storyline zones ──
-      storylines.forEach((s) => {
-        const color = RISK_COLORS[s.risk] || "#6b7280";
-
-        // Glowing circle zone
-        L.circle([s.lat, s.lng], {
-          radius: 80,
-          color,
-          fillColor: color,
-          fillOpacity: 0.07,
-          weight: 1.5,
-          dashArray: "4 4",
-          opacity: 0.5,
-        }).addTo(map);
-      });
-
-      // ── Draw incidents ──
-      incidents.forEach((inc) => {
-        const storyline = storylines.find((s) => s.incident_ids.includes(inc.id));
-        const color = storyline ? (RISK_COLORS[storyline.risk] || "#6b7280") : "#6b7280";
-        const icon = TYPE_ICONS[inc.type] || "•";
-        const time = new Date(inc.timestamp).toLocaleTimeString("en-IN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          timeZone: "Asia/Kolkata",
-        });
-
-        const divIcon = L.divIcon({
-          className: "",
-          html: `<div class="${styles.mapMarker}" style="--marker-color:${color}" title="${inc.description}">
-                   <div class="${styles.markerDot}"></div>
-                   <div class="${styles.markerRing}"></div>
-                   <div class="${styles.markerLabel}">${icon} ${time}</div>
-                 </div>`,
-          iconSize: [40, 40],
-          iconAnchor: [20, 20],
-        });
-
-        L.marker([inc.lat, inc.lng], { icon: divIcon })
-          .bindPopup(
-            `<div style="font-family:Inter,sans-serif;color:#e2e8f0;background:#1a1f2e;padding:8px;border-radius:8px;font-size:12px;max-width:220px;line-height:1.5">
-              <strong style="color:#f59e0b">${inc.type.replace(/_/g, " ")}</strong><br/>
-              ${inc.zone}<br/><span style="color:#64748b">${time} IST</span><br/>
-              <em style="color:#94a3b8">${inc.description}</em>
-            </div>`,
-            { className: styles.popup }
-          )
-          .addTo(map);
-      });
-
-      // ── Drone Nest marker ──
-      const nestIcon = L.divIcon({
-        className: "",
-        html: `<div class="${styles.nestMarker}">🏠<span class="${styles.nestLabel}">Drone Nest</span></div>`,
-        iconSize: [60, 32],
-        iconAnchor: [30, 16],
-      });
-      L.marker([droneNest.lat, droneNest.lng], { icon: nestIcon }).addTo(map);
-
       mapInstance.current = map;
+      setMapReady(true);
     }
     initMap();
 
-    // Cleanup: destroy the map when the effect is torn down (Strict Mode unmount,
-    // HMR, navigation). This prevents the "already initialized" error on remount.
     return () => {
       cancelled = true;
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapCenter.lat, mapCenter.lng, mapZoom]);
+  }, []); // Only init once on mount
+
+  // ── Sync External Center/Zoom ──
+  useEffect(() => {
+    if (!mapReady || !mapInstance.current) return;
+    mapInstance.current.setView([mapCenter.lat, mapCenter.lng], mapZoom, { animate: true });
+  }, [mapReady, mapCenter.lat, mapCenter.lng, mapZoom]);
+
+  // ── Render Layer (Markers/Clusters) ──
+  const layerGroup = useRef<any>(null);
+  useEffect(() => {
+    if (!mapReady || !mapInstance.current) return;
+
+    // Clear old markers
+    if (layerGroup.current) {
+        mapInstance.current.removeLayer(layerGroup.current);
+    }
+
+    async function updateLayers() {
+        const L = (await import("leaflet")).default;
+        const group = L.layerGroup().addTo(mapInstance.current);
+        layerGroup.current = group;
+
+        // Draw storyline zones
+        storylines.forEach((s) => {
+            const color = RISK_COLORS[s.risk] || "#6b7280";
+            L.circle([s.lat, s.lng], {
+                radius: 80,
+                color,
+                fillColor: color,
+                fillOpacity: 0.1,
+                weight: 1.5,
+                dashArray: "4 4",
+                opacity: 0.5,
+            }).addTo(group);
+        });
+
+        // Draw incidents
+        incidents.forEach((inc) => {
+            const storyline = storylines.find((s) => s.incident_ids.includes(inc.id));
+            const color = storyline ? (RISK_COLORS[storyline.risk] || "#6b7280") : "#6b7280";
+            const icon = TYPE_ICONS[inc.type] || "•";
+            const time = new Date(inc.timestamp).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
+
+            const divIcon = L.divIcon({
+                className: "",
+                html: `<div class="${styles.mapMarker}" style="--marker-color:${color}">
+                        <div class="${styles.markerDot}"></div>
+                        <div class="${styles.markerLabel}">${icon} ${time}</div>
+                      </div>`,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
+            });
+
+            L.marker([inc.lat, inc.lng], { icon: divIcon })
+                .bindPopup(inc.description)
+                .addTo(group);
+        });
+
+        // Drone Nest
+        const nestIcon = L.divIcon({
+            className: "",
+            html: `<div class="${styles.nestMarker}">🏠</div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+        });
+        L.marker([droneNest.lat, droneNest.lng], { icon: nestIcon }).addTo(group);
+    }
+    updateLayers();
+  }, [mapReady, incidents, storylines, droneNest]);
 
   // ── Pan to selected storyline ─────────────────────────────────────────────
   useEffect(() => {
-    if (!mapInstance.current || !selectedStoryline) return;
+    if (!mapReady || !mapInstance.current || !selectedStoryline) return;
     mapInstance.current.flyTo([selectedStoryline.lat, selectedStoryline.lng], 16, {
       animate: true, duration: 1.2,
     });
-  }, [selectedStoryline]);
+  }, [mapReady, selectedStoryline]);
 
   // ── Drone animation ───────────────────────────────────────────────────────
   const animateDrone = useCallback(async (target: { lat: number; lng: number }) => {
-    if (!mapInstance.current) return;
+    if (!mapReady || !mapInstance.current) return;
     const L = (await import("leaflet")).default;
 
     setIsDroneFlying(true);
@@ -230,7 +216,7 @@ export default function MapCanvas({
       animFrame.current = requestAnimationFrame(() => setTimeout(tick, 30));
     };
     tick();
-  }, [droneNest.lat, droneNest.lng]);
+  }, [mapReady, droneNest.lat, droneNest.lng]);
 
   useEffect(() => {
     if (droneTarget) animateDrone(droneTarget);
@@ -282,4 +268,7 @@ export default function MapCanvas({
       </div>
     </div>
   );
-}
+});
+
+MapCanvas.displayName = "MapCanvas";
+export default MapCanvas;
