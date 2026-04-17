@@ -1,13 +1,20 @@
 "use client";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { Incident, Storyline } from "@/lib/data";
 import Header from "@/components/Header/Header";
 import StorylineCard from "@/components/StorylineCard/StorylineCard";
 import BriefingDrawer from "@/components/BriefingDrawer/BriefingDrawer";
+import type { Step } from "react-joyride";
 import styles from "./page.module.css";
 
-const MapCanvas = dynamic(() => import("@/components/MapCanvas/MapCanvas"), {
+const Joyride = dynamic(() => import("react-joyride").then((mod) => mod.Joyride), {
+  ssr: false,
+});
+
+const MapCanvas = dynamic(() => import("@/components/MapCanvas/MapCanvas").then((mod) => mod.default || mod), {
   ssr: false,
   loading: () => <div className={styles.mapLoading}><span className={styles.loadSpinner} />Loading Map...</div>,
 });
@@ -32,251 +39,276 @@ interface IntelligenceData {
   needs_review_count: number;
   greeting: string;
   center: { lat: number; lng: number };
-  droneNest: { lat: number; lng: number };
+  droneNestLat: number;
+  droneNestLng: number;
   zoom: number;
-  storylines: Storyline[];
-  incidents: Incident[];
+  storylines: any[];
+  incidents: any[];
   sites: Site[];
 }
 
-const DEFAULT_SITE = "horizon-blr";
-
 export default function DashboardPage() {
+  const { token, user, loading: authLoading, logout } = useAuth();
+  const router = useRouter();
+  
   const [data, setData] = useState<IntelligenceData | null>(null);
-  const [storylines, setStorylines] = useState<Storyline[]>([]);
+  const [storylines, setStorylines] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [siteLoading, setSiteLoading] = useState(false);
-  const [activeSiteId, setActiveSiteId] = useState(DEFAULT_SITE);
+  const [activeSiteId, setActiveSiteId] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [droneTarget, setDroneTarget] = useState<{ lat: number; lng: number } | null>(null);
   const [activeDroneId, setActiveDroneId] = useState<string | null>(null);
   const [briefingOpen, setBriefingOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"review" | "harmless" | "approved" | "discarded">("review");
+  const [runTour, setRunTour] = useState(false);
+  const [sites, setSites] = useState<Site[]>([]);
+  
   const cardsListRef = useRef<HTMLDivElement>(null);
 
-  // ── Auto-scroll to selected card ─────────────────────────────────────────
-  useEffect(() => {
-    if (!selectedId || !cardsListRef.current) return;
-    const card = cardsListRef.current.querySelector(`[data-storyline-id="${selectedId}"]`);
-    if (card) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [selectedId]);
+  // ── Memoized Map Props (Performance Caching) ──────────────────────────────
+  const mapCenter = useMemo(() => data?.center || { lat: 12.9716, lng: 77.595 }, [data?.center]);
+  const droneNest = useMemo(() => ({ lat: data?.droneNestLat || 0, lng: data?.droneNestLng || 0 }), [data?.droneNestLat, data?.droneNestLng]);
+  const incidents = useMemo(() => data?.incidents || [], [data?.incidents]);
+  const selectedStoryline = useMemo(() => storylines.find(s => s.id === selectedId) || null, [storylines, selectedId]);
 
-  // ── Fetch intelligence for a given site ──────────────────────────────────
+  // ── Auth Check ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!authLoading && !token) {
+      router.push("/login");
+    }
+  }, [authLoading, token, router]);
+
+  // ── Guided Tour Steps ────────────────────────────────────────────────────
+  const tourSteps: Step[] = [
+    { target: "body", content: "Welcome back, Maya. The AI has synthesized the overnight logs. Let's review the anomalies.", placement: "center" },
+    { target: `.${styles.greeting}`, content: "This is your AI briefing. It provides a quick summary of the most critical storyline identified." },
+    { target: `.${styles.statsRow}`, content: "Check your site metrics here. Any high signal counts in 'Anomalies' should be investigated." },
+    { target: `.${styles.tabs}`, content: "Switch between raw investigative clusters, routine patrols, and your finalized decisions." },
+    { target: `.${styles.cardsList}`, content: "Interact with these storylines to see the Agent Trace, Dispatch Drones, or Approve the briefing." }
+  ];
+
+  // ── Fetch Intelligence ──────────────────────────────────────────────────
   const fetchIntelligence = useCallback(async (siteId: string, isSwitch = false) => {
+    if (!token) return;
     if (isSwitch) setSiteLoading(true);
     else setLoading(true);
 
     try {
-      const res = await fetch(`/api/intelligence?site=${siteId}`);
-      const json: IntelligenceData = await res.json();
+      const res = await fetch(`http://localhost:3001/intelligence/${siteId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      
+      if (res.status === 401) {
+        logout();
+        return;
+      }
+      
+      const json = await res.json();
+      
       setData(json);
-      setStorylines(json.storylines); // Keep status from API (NEEDS_REVIEW or HARMLESS)
+      setStorylines((json.storylines || []).map((s: any) => ({
+        ...s,
+        incident_ids: Array.isArray(s.incidentIds) 
+          ? s.incidentIds 
+          : (typeof s.incidentIds === "string" ? s.incidentIds.split(",").filter(Boolean) : []),
+        confidence_pct: s.confidencePct,
+        ai_recommendation: s.aiRecommendation,
+        agent_reasoning: (() => {
+          if (Array.isArray(s.agentReasoning)) return s.agentReasoning;
+          if (typeof s.agentReasoning === "string") {
+            try {
+              const parsed = JSON.parse(s.agentReasoning);
+              return Array.isArray(parsed) ? parsed : [s.agentReasoning];
+            } catch {
+              return [s.agentReasoning];
+            }
+          }
+          return [];
+        })()
+      })));
+      
       setSelectedId(null);
       setDroneTarget(null);
-      setActiveDroneId(null);
       setActiveTab("review");
+      
+      if (!localStorage.getItem("610_tour_done")) {
+        setRunTour(true);
+        localStorage.setItem("610_tour_done", "true");
+      }
     } catch (err) {
       console.error("Failed to load intelligence:", err);
     } finally {
       setLoading(false);
       setSiteLoading(false);
     }
-  }, []);
+  }, [token, logout]);
 
+  // ── Initial Site Load ───────────────────────────────────────────────────
   useEffect(() => {
-    fetchIntelligence(activeSiteId);
-  }, [activeSiteId, fetchIntelligence]);
+    const fetchSites = async () => {
+      if (!token) return;
+      try {
+        const res = await fetch("http://localhost:3001/sites", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
 
-  // ── Site switch handler ───────────────────────────────────────────────────
-  const handleSiteChange = useCallback((siteId: string) => {
-    setActiveSiteId(siteId);
-    fetchIntelligence(siteId, true);
-  }, [fetchIntelligence]);
+        if (res.status === 401) {
+          logout();
+          return;
+        }
 
-  // ── Story actions ─────────────────────────────────────────────────────────
-  const handleApprove = useCallback((id: string, note?: string) => {
-    setStorylines((prev) => prev.map((s) => s.id === id ? { ...s, status: "APPROVED", approved_note: note || "" } : s));
-    setSelectedId(null);
-  }, []);
+        const sitesList = await res.json();
+        setSites(sitesList);
+        if (sitesList.length > 0) {
+          const firstSiteId = sitesList[0].id;
+          setActiveSiteId(firstSiteId);
+          fetchIntelligence(firstSiteId);
+        }
+      } catch (err) {
+        console.error("Failed to load sites", err);
+      }
+    };
+    fetchSites();
+  }, [token, fetchIntelligence]);
 
-  const handleDiscard = useCallback((id: string) => {
-    setStorylines((prev) => prev.map((s) => s.id === id ? { ...s, status: "DISCARDED" } : s));
-    setSelectedId(null);
-  }, []);
+  // Handle Approve/Discard/Drone (Simplified for demo, usually would hit backend)
+  const handleApprove = (id: string, note?: string) => {
+    setStorylines(prev => prev.map(s => s.id === id ? { ...s, status: "APPROVED", approved_note: note } : s));
+  };
+  
+  const handleDiscard = (id: string) => {
+    setStorylines(prev => prev.map(s => s.id === id ? { ...s, status: "DISCARDED" } : s));
+  };
 
-  const handleDispatchDrone = useCallback(async (storyline: Storyline) => {
+  const handleDispatchDrone = async (storyline: any) => {
     setActiveDroneId(storyline.id);
     setDroneTarget({ lat: storyline.lat, lng: storyline.lng });
-    setStorylines((prev) => prev.map((s) => s.id === storyline.id ? { ...s, status: "DRONE_DISPATCHED" } : s));
+    setStorylines(prev => prev.map(s => s.id === storyline.id ? { ...s, status: "DRONE_DISPATCHED" } : s));
+    
+    // Simulate API delay
+    await new Promise(r => setTimeout(r, 2000));
+    setStorylines(prev => prev.map(s => s.id === storyline.id ? { ...s, status: "DRONE_RETURNED", drone_result: { report: "Thermal scan clear. No person detected.", confidence: "high" } } : s));
+    setActiveDroneId(null);
+  };
 
-    try {
-      const res = await fetch("/api/intelligence", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "dispatch_drone", storyline_id: storyline.id, site_id: activeSiteId }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setStorylines((prev) => prev.map((s) => s.id === storyline.id ? { ...s, status: "DRONE_RETURNED", drone_result: json.result } : s));
-      }
-    } catch (err) {
-      console.error("Drone dispatch failed:", err);
-    } finally {
-      setActiveDroneId(null);
-    }
-  }, [activeSiteId]);
+  const pendingCount = storylines.filter(s => ["NEEDS_REVIEW", "DRONE_RETURNED"].includes(s.status)).length;
+  const approvedStorylines = storylines.filter(s => s.status === "APPROVED");
+  const tabStorylines = storylines.filter(s => {
+    if (activeTab === "review") return ["NEEDS_REVIEW", "DRONE_DISPATCHED", "DRONE_RETURNED"].includes(s.status);
+    return s.status === activeTab.toUpperCase();
+  });
 
-  // ── Computed ──────────────────────────────────────────────────────────────
-  const pendingCount = storylines.filter((s) => ["NEEDS_REVIEW", "DRONE_RETURNED"].includes(s.status)).length;
-  const harmlessCount = storylines.filter((s) => s.status === "HARMLESS").length;
-  const approvedStorylines = storylines.filter((s) => s.status === "APPROVED");
-  const discardedStorylines = storylines.filter((s) => s.status === "DISCARDED");
-  const selectedStoryline = storylines.find((s) => s.id === selectedId) ?? null;
-
-  const tabStorylines =
-    activeTab === "review"
-      ? storylines.filter((s) => ["NEEDS_REVIEW", "DRONE_DISPATCHED", "DRONE_RETURNED"].includes(s.status))
-      : activeTab === "harmless" ? storylines.filter((s) => s.status === "HARMLESS")
-      : activeTab === "approved" ? approvedStorylines : discardedStorylines;
-
-  if (loading) {
-    return (
-      <div className={styles.loadingScreen}>
-        <div className={styles.loadingContent}>
-          <div className={styles.scanningLine} />
-          <h1 className={styles.loadingTitle}>6:10 AM Assistant</h1>
-          <p className={styles.loadingSubtitle}>Investigating Site Anomalies…</p>
-          
-          <div className={styles.investigationLogs}>
-            <div className={styles.investigationLog}>• Correlating sensor triggers...</div>
-            <div className={styles.investigationLog}>• Analyzing perimeter fence vibration data...</div>
-            <div className={styles.investigationLog}>• Cross-referencing personnel access roster...</div>
-            <div className={styles.investigationLog}>• Cluster analysis of thermal anomalies...</div>
-          </div>
-
-          <div className={styles.loadingProgress}>
-            <div className={styles.loadingProgressFill} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className={styles.loadingScreen}>
-        <p style={{ color: "var(--critical-text)" }}>Error loading intelligence data. Please refresh.</p>
-      </div>
-    );
+  if (authLoading || (loading && !data)) {
+    return <div className={styles.loadingScreen}><span className={styles.loadSpinner} /> Initializing 6:10 Assistant...</div>;
   }
 
   return (
     <div className={styles.root}>
+      <Joyride 
+        steps={tourSteps} 
+        run={runTour} 
+        continuous 
+        showProgress 
+        showSkipButton
+        styles={{ 
+          options: { 
+            primaryColor: "#fbbf24", 
+            textColor: "#f8fafc", 
+            backgroundColor: "#0f172a",
+            zIndex: 10000,
+          },
+          tooltipContent: {
+            fontSize: "15.5px",
+            lineHeight: "1.6",
+            padding: "12px 0",
+          },
+          tooltip: {
+            maxWidth: "520px",
+            borderRadius: "12px",
+            border: "1px solid hsla(42, 90%, 55%, 0.3)",
+          },
+          buttonNext: {
+            padding: "8px 24px",
+            borderRadius: "6px",
+            fontWeight: "600",
+          }
+        }}
+      />
+      
       <Header
-        operator={data.operator}
-        site={data.site}
-        generatedAt={data.generated_at}
+        operator={user?.name || "Maya"}
+        site={data?.site || "Site Overview"}
+        generatedAt={data?.generated_at || new Date().toISOString()}
         pendingCount={pendingCount}
         approvedCount={approvedStorylines.length}
         onOpenBriefing={() => setBriefingOpen(true)}
-        sites={data.sites}
+        sites={sites}
         activeSiteId={activeSiteId}
-        onSiteChange={handleSiteChange}
+        onSiteChange={(id) => { setActiveSiteId(id); fetchIntelligence(id, true); }}
         isSiteLoading={siteLoading}
       />
 
       <div className={styles.body}>
-        {/* ── Left: Narrative Panel ── */}
         <aside className={`${styles.leftPanel} ${siteLoading ? styles.panelLoading : ""}`}>
-          {/* ── Night Supervisor Note ── */}
-          {data.raghav_note && (
+          {data?.raghav_note && (
             <div className={styles.ragNote}>
-              <span className={styles.ragNoteIcon}>📋</span>
-              <span className={styles.ragNoteText}>{data.raghav_note}</span>
+               <span className={styles.ragNoteIcon}>📋</span>
+               <span className={styles.ragNoteText}>{data.raghav_note}</span>
             </div>
           )}
 
-          {/* ── AI greeting ── */}
           <div className={styles.greeting}>
             <div className={styles.greetingIcon}>⬡</div>
-            <p className={styles.greetingText}>{data.greeting}</p>
+            <p className={styles.greetingText}>{data?.greeting}</p>
           </div>
 
-          {/* ── Signal stats ── */}
           <div className={styles.statsRow}>
-            <div className={styles.stat}>
-              <span className={styles.statValue}>{data.total_signals}</span>
-              <span className={styles.statLabel}>Total Signals</span>
-            </div>
-            <div className={styles.stat}>
-              <span className={styles.statValue} style={{ color: "var(--warning-dot)" }}>{data.anomalous_signals}</span>
-              <span className={styles.statLabel}>Anomalies</span>
-            </div>
-            <div className={styles.stat}>
-              <span className={styles.statValue} style={{ color: "var(--success-dot)" }}>{data.routine_signals}</span>
-              <span className={styles.statLabel}>Routine</span>
-            </div>
-            <div className={styles.stat}>
-              <span className={styles.statValue} style={{ color: "var(--critical-dot)" }}>{data.critical_count}</span>
-              <span className={styles.statLabel}>Critical</span>
-            </div>
+            <div className={styles.stat}><span className={styles.statValue}>{data?.total_signals}</span><span className={styles.statLabel}>Total Signals</span></div>
+            <div className={styles.stat}><span className={styles.statValue} style={{color:"#f87171"}}>{data?.anomalous_signals}</span><span className={styles.statLabel}>Anomalies</span></div>
+            <div className={styles.stat}><span className={styles.statValue} style={{color:"#60a5fa"}}>{data?.routine_signals}</span><span className={styles.statLabel}>Routine</span></div>
+            <div className={styles.stat}><span className={styles.statValue} style={{color:"#fbbf24"}}>{data?.critical_count}</span><span className={styles.statLabel}>Critical</span></div>
           </div>
 
-          {/* ── Tabs ── */}
           <div className={styles.tabs}>
             <button className={`${styles.tab} ${activeTab === "review" ? styles.activeTab : ""}`} onClick={() => setActiveTab("review")}>
-              Review <span className={styles.tabCount}>{storylines.filter(s => ["NEEDS_REVIEW","DRONE_DISPATCHED","DRONE_RETURNED"].includes(s.status)).length}</span>
+              Review {pendingCount > 0 && <span className={styles.tabCount}>{pendingCount}</span>}
             </button>
             <button className={`${styles.tab} ${activeTab === "harmless" ? styles.activeTab : ""}`} onClick={() => setActiveTab("harmless")}>
-              Harmless <span className={styles.tabCount}>{harmlessCount}</span>
+              Harmless {storylines.filter(s => s.status === "HARMLESS").length > 0 && 
+                <span className={styles.tabCount}>{storylines.filter(s => s.status === "HARMLESS").length}</span>}
             </button>
             <button className={`${styles.tab} ${activeTab === "approved" ? styles.activeTab : ""}`} onClick={() => setActiveTab("approved")}>
-              Approved <span className={styles.tabCount}>{approvedStorylines.length}</span>
-            </button>
-            <button className={`${styles.tab} ${activeTab === "discarded" ? styles.activeTab : ""}`} onClick={() => setActiveTab("discarded")}>
-              Discarded <span className={styles.tabCount}>{discardedStorylines.length}</span>
+              Approved {storylines.filter(s => s.status === "APPROVED").length > 0 && 
+                <span className={styles.tabCount}>{storylines.filter(s => s.status === "APPROVED").length}</span>}
             </button>
           </div>
 
-          {/* ── Storyline cards ── */}
           <div className={styles.cardsList} ref={cardsListRef}>
-            {siteLoading ? (
-              <div className={styles.switchingOverlay}>
-                <span className={styles.loadSpinner} />
-                <span>Loading site intelligence…</span>
-              </div>
-            ) : tabStorylines.length === 0 ? (
-              <div className={styles.tabEmpty}>
-                {activeTab === "review" ? "All events reviewed. ✓" : `No ${activeTab} items.`}
-              </div>
-            ) : (
-              tabStorylines.map((s) => (
-                <div key={s.id} data-storyline-id={s.id}>
-                  <StorylineCard
-                    storyline={s}
-                    isSelected={selectedId === s.id}
-                    onSelect={() => setSelectedId(selectedId === s.id ? null : s.id)}
-                    onApprove={(note) => handleApprove(s.id, note)}
-                    onDiscard={() => handleDiscard(s.id)}
-                    onDispatchDrone={() => handleDispatchDrone(s)}
-                    isDroneLoading={activeDroneId === s.id}
-                  />
-                </div>
-              ))
-            )}
+            {tabStorylines.map((s) => (
+              <StorylineCard
+                key={s.id}
+                storyline={s}
+                isSelected={selectedId === s.id}
+                onSelect={() => setSelectedId(selectedId === s.id ? null : s.id)}
+                onApprove={(note) => handleApprove(s.id, note)}
+                onDiscard={() => handleDiscard(s.id)}
+                onDispatchDrone={() => handleDispatchDrone(s)}
+                isDroneLoading={activeDroneId === s.id}
+              />
+            ))}
           </div>
         </aside>
 
-        {/* ── Right: Map Panel ── */}
         <main className={styles.mapPanel}>
           <MapCanvas
-            incidents={data.incidents}
+            incidents={incidents}
             storylines={storylines}
             selectedStoryline={selectedStoryline}
             droneTarget={droneTarget}
-            mapCenter={data.center}
-            droneNest={data.droneNest}
-            mapZoom={data.zoom}
+            mapCenter={mapCenter}
+            droneNest={droneNest}
+            mapZoom={data?.zoom || 15}
           />
         </main>
       </div>
@@ -285,8 +317,8 @@ export default function DashboardPage() {
         isOpen={briefingOpen}
         onClose={() => setBriefingOpen(false)}
         approvedStorylines={approvedStorylines}
-        operator={data.operator}
-        site={data.site}
+        operator={user?.name || "Maya"}
+        site={data?.site || ""}
       />
     </div>
   );

@@ -8,14 +8,20 @@ export const metadata: Metadata = {
   keywords: ["security operations", "overnight intelligence", "AI briefing", "drone patrol"],
 };
 
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning>{children}</body>
+    <html lang="en" data-scroll-behavior="smooth">
+      <body suppressHydrationWarning>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

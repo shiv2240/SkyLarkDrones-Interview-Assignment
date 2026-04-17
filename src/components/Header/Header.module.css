@@ -161,3 +161,22 @@
   font-size: 11px;
   font-weight: 700;
 }
+.logoutBtn {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.5px;
+}
+
+.logoutBtn:hover {
+  background: hsla(0, 80%, 50%, 0.1);
+  color: var(--critical-text);
+  border-color: var(--critical-border);
+}

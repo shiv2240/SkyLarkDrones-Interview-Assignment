@@ -1,4 +1,8 @@
+import { useState } from "react";
 import SiteSelector from "@/components/SiteSelector/SiteSelector";
+import AuditLogs from "@/components/AuditLogs/AuditLogs";
+import { useAuth } from "@/context/AuthContext";
+import { Activity } from "lucide-react";
 import styles from "./Header.module.css";
 
 interface Site {
@@ -25,9 +29,14 @@ export default function Header({
   operator, site, generatedAt, pendingCount, approvedCount,
   onOpenBriefing, sites, activeSiteId, onSiteChange, isSiteLoading,
 }: HeaderProps) {
+  const { user } = useAuth();
+  const [logsOpen, setLogsOpen] = useState(false);
+
   const time = new Date(generatedAt).toLocaleTimeString("en-IN", {
     hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata",
   });
+
+  const isManager = user?.role === "SITE_HEAD" || user?.role === "ADMIN";
 
   return (
     <header className={styles.header}>
@@ -50,7 +59,6 @@ export default function Header({
         </div>
       </div>
 
-      {/* ── Site Selector ── */}
       <div className={styles.siteSelectorWrap}>
         <SiteSelector
           sites={sites}
@@ -73,6 +81,17 @@ export default function Header({
       </div>
 
       <div className={styles.actions}>
+        {isManager && (
+          <button 
+            className={styles.logsBtn} 
+            onClick={() => setLogsOpen(true)}
+            title="View System Audit Logs"
+          >
+            <Activity size={18} />
+            Agent Activity
+          </button>
+        )}
+        
         {pendingCount > 0 && (
           <div className={styles.pendingBadge}>
             <span className={styles.pendingDot} />
@@ -91,7 +110,15 @@ export default function Header({
           Morning Brief
           {approvedCount > 0 && <span className={styles.approvedCount}>{approvedCount}</span>}
         </button>
+
+        <div className={styles.divider} />
+
+        <button className={styles.logoutBtn} onClick={() => { localStorage.clear(); window.location.href = "/login"; }}>
+           Sign Out
+        </button>
       </div>
+
+      <AuditLogs isOpen={logsOpen} onClose={() => setLogsOpen(false)} />
     </header>
   );
 }

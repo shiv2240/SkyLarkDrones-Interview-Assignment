@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  sites     Site[]
+  users     User[]
+}
+
+model User {
+  id             String       @id @default(uuid())
+  email          String       @unique
+  passwordHash   String
+  name           String
+  role           String
+  organizationId String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model Site {
+  id             String       @id @default(uuid())
+  name           String
+  label          String
+  city           String
+  lat            Float
+  lng            Float
+  droneNestLat   Float
+  droneNestLng   Float
+  zoom           Int
+  operator       String
+  raghavNote     String
+  organizationId String
+  incidents      Incident[]
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  storylines     Storyline[]
+}
+
+model Incident {
+  id          String   @id @default(uuid())
+  type        String
+  timestamp   DateTime
+  lat         Float
+  lng         Float
+  zone        String
+  description String
+  metadata    String?
+  siteId      String
+  site        Site     @relation(fields: [siteId], references: [id])
+}
+
+model Storyline {
+  id               String   @id @default(uuid())
+  title            String
+  zone             String
+  lat              Float
+  lng              Float
+  risk             String
+  status           String
+  hypothesis       String
+  confidence       String
+  confidencePct    Int
+  incidentIds      String
+  aiRecommendation String
+  agentReasoning   String?
+  approvedNote     String?
+  siteId           String
+  createdAt        DateTime @default(now())
+  site             Site     @relation(fields: [siteId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  operator  String
+  details   String
+  category  String
+  timestamp DateTime @default(now())
+}
