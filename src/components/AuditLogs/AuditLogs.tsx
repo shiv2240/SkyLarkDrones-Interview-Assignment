@@ -21,7 +21,8 @@ export default function AuditLogs({ isOpen, onClose }: { isOpen: boolean; onClos
 
   useEffect(() => {
     if (isOpen && token) {
-      fetch("http://localhost:3001/admin/logs", {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      fetch(`${API_BASE}/admin/logs`, {
         headers: { "Authorization": `Bearer ${token}` }
       })
       .then(res => res.json())

@@ -14,6 +14,8 @@ const Joyride = dynamic(() => import("react-joyride").then((mod) => mod.Joyride)
   ssr: false,
 });
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
 const MapCanvas = dynamic(() => import("@/components/MapCanvas/MapCanvas").then((mod) => mod.default || mod), {
   ssr: false,
   loading: () => <div className={styles.mapLoading}><span className={styles.loadSpinner} />Loading Map...</div>,
@@ -95,7 +97,7 @@ export default function DashboardPage() {
     else setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:3001/intelligence/${siteId}`, {
+      const res = await fetch(`${API_BASE}/intelligence/${siteId}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       
@@ -149,7 +151,7 @@ export default function DashboardPage() {
     const fetchSites = async () => {
       if (!token) return;
       try {
-        const res = await fetch("http://localhost:3001/sites", {
+        const res = await fetch(`${API_BASE}/sites`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
 
@@ -212,6 +214,7 @@ export default function DashboardPage() {
         showProgress 
         showSkipButton
         styles={{ 
+          // @ts-ignore
           options: { 
             primaryColor: "#fbbf24", 
             textColor: "#f8fafc", 
