@@ -3,21 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently -n \"SERVER,FRONTEND,PRISMA\" -c \"bgBlue.bold,bgGreen.bold,bgMagenta.bold\" \"npm run dev:server\" \"npm run dev:frontend\" \"npm run dev:db\"",
+    "dev": "next dev",
     "dev:frontend": "next dev",
-    "dev:server": "npm --prefix server run dev",
-    "dev:db": "npm --prefix server run studio",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prisma:studio": "npx prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "@types/leaflet": "^1.9.21",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
+    "jsonwebtoken": "^9.0.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.8.0",
     "next": "16.2.4",
+    "openai": "^6.34.0",
+    "prisma": "^6.19.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-joyride": "^3.0.2",
@@ -25,6 +29,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

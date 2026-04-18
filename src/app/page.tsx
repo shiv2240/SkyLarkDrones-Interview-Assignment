@@ -17,9 +17,6 @@ const Joyride = dynamic(
   },
 );
 
-// Dynamically detect API base for remote/mobile testing
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 
-                 (typeof window !== "undefined" ? `http://${window.location.hostname}:3001` : "http://localhost:3001");
 
 const MapCanvas = dynamic(
   () =>
@@ -150,7 +147,7 @@ export default function DashboardPage() {
       else setLoading(true);
 
       try {
-        const res = await fetch(`${API_BASE}/intelligence/${siteId}`, {
+        const res = await fetch(`/api/intelligence/${siteId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -210,7 +207,7 @@ export default function DashboardPage() {
     const fetchSites = async () => {
       if (!token) return;
       try {
-        const res = await fetch(`${API_BASE}/sites`, {
+        const res = await fetch("/api/sites", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

@@ -20,22 +20,16 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // Dynamically detect API base to support mobile/remote testing
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 
-                       (typeof window !== "undefined" ? `http://${window.location.hostname}:3001` : "http://localhost:3001");
-      
-      console.log("Attempting login for:", email, "at", API_BASE);
-      const res = await fetch(`${API_BASE}/auth/login`, {
+      console.log("Attempting login for:", email);
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      console.log("Login response status:", res.status);
       const data = await res.json();
       
       if (!res.ok) {
-        console.error("Login failed:", data.error);
         throw new Error(data.error || "Login failed");
       }
 
