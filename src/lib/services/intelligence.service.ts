@@ -180,7 +180,8 @@ export class IntelligenceService {
         summary: parsed.summary,
       };
     } catch (err: any) {
-      console.warn("AI synthesis failed, falling back to local.");
+      console.error("AI Synthesis Error Details:", err);
+      console.warn("AI synthesis failed, falling back to local analysis engine.");
       const fallback = await this.localFallback(siteId, site.incidents);
       return {
         ...fallback,
