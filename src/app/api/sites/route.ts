@@ -15,8 +15,9 @@ export async function GET(request: Request) {
     });
     return NextResponse.json(sites);
   } catch (err: any) {
+    console.error("Sites API Error:", err);
     return NextResponse.json(
-      { error: "Failed to fetch sites" },
+      { error: "Failed to fetch sites", details: err.message },
       { status: 500 },
     );
   }

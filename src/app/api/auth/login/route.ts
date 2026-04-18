@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Login API Global Error:", err);
+    return NextResponse.json({ error: "Internal Server Error", details: err.message }, { status: 500 });
   }
 }

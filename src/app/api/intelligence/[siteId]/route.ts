@@ -19,7 +19,7 @@ export async function GET(
   } catch (err: any) {
     console.error("Intelligence API Error:", err);
     return NextResponse.json(
-      { error: err.message || "Failed to synthesize intelligence" },
+      { error: err.message || "Failed to synthesize intelligence", details: err.message },
       { status: 500 },
     );
   }
