@@ -53,6 +53,7 @@ Every morning, the site "knows" something happened, but nobody knows the full st
 ## 🛠 Multi-Tier Architecture
 - **Unified Stack**: Next.js 16 (Monolithic App Router Architecture).
 - **Backend Logic**: Next.js Route Handlers (integrated API with JWT & RBAC).
+- **Vercel Optimization**: Implemented dynamic absolute path resolution for SQLite to ensure serverless compatibility.
 - **Database**: Prisma ORM with SQLite (Fast, portable, and production-ready for industrial edge).
 - **Mapping**: Leaflet + Mapbox Vector Tiles + Custom Industrial Styling.
 - **AI**: Groq Llama-3 (Cloud Inference) for sub-second synthesis.

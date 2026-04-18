@@ -7,15 +7,21 @@ const prismaClientSingleton = () => {
   const isVercel = process.env.VERCEL === "1";
   const dbPath = isVercel 
     ? `file:${path.join(process.cwd(), "prisma", "dev.db")}`
-    : undefined; // Defaults to schema.prisma value locally
+    : null;
 
-  return new PrismaClient({
-    datasources: {
-      db: {
-        url: dbPath,
-      },
-    },
-  });
+  // Only override datasources if we have a specific path (Vercel)
+  // Otherwise, let Prisma use the default from schema.prisma
+  return new PrismaClient(
+    dbPath
+      ? {
+          datasources: {
+            db: {
+              url: dbPath,
+            },
+          },
+        }
+      : undefined
+  );
 };
 
 type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
