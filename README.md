@@ -9,14 +9,26 @@ The **6:10 Assistant** is a high-stakes, AI-native intelligence platform designe
 ## 🚀 Unified Operation Launch
 The entire platform (Frontend, Backend, and Database Studio) is orchestrated into a single command. 
 
-1. **Install Root Dependencies**: `npm install`
-2. **Setup Server**: `cd server && npm install`
-3. **Database Readiness**: `npm --prefix server run prisma:generate`
-4. **Launch Synchronized Stack**:
+> [!IMPORTANT]
+> **Environment Variables are mandatory.** Before starting the services, you must configure the `.env` files.
+
+1. **Setup Environment**:
+   - Copy `env.example` to `.env` in the **root** directory and add your `NEXT_PUBLIC_MAPBOX_TOKEN` and `GROQ_API_KEY`.
+   - Copy `server/env.example` to `server/.env` and add your `GROQ_API_KEY`, `JWT_SECRET`, and `DATABASE_URL`.
+2. **Install Root Dependencies**: `npm install`
+3. **Setup Server**: `cd server && npm install`
+4. **Database Readiness**: `npm --prefix server run prisma:generate`
+5. **Launch Synchronized Stack**:
    ```bash
    npm run dev
    ```
    *This launches the API (3001), UI (3000), and Prisma Studio (5555) in a single color-coded terminal.*
+
+---
+
+## 🌐 Live Deployment
+The platform is also deployed and can be accessed here:
+**[Live Demo Link](https://sky-lark-drones-interview-assignmen.vercel.app/)**
 
 ---
 

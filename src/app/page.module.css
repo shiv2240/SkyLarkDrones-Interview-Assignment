@@ -8,6 +8,14 @@
   overflow: hidden;
 }
 
+@media (max-width: 1024px) {
+  .root {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+}
+
 .body {
   flex: 1;
   display: flex;
@@ -19,7 +27,8 @@
 @media (max-width: 1024px) {
   .body {
     flex-direction: column;
-    overflow-y: auto;
+    overflow: visible; /* Let the root scroll the whole page */
+    height: auto;
   }
 }
 
@@ -41,7 +50,7 @@
 @media (max-width: 1024px) {
   .leftPanel {
     width: 100%;
-    max-height: 50vh;
+    max-height: none; /* Let it expand naturally on mobile */
     border-right: none;
     border-bottom: 1px solid var(--border-subtle);
   }
@@ -157,6 +166,21 @@
   flex-shrink: 0;
 }
 
+@media (max-width: 640px) {
+  .tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 2px;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .tab {
+    flex-shrink: 0;
+  }
+}
+
 .tab {
   display: flex;
   align-items: center;
@@ -202,11 +226,19 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--space-3) var(--space-4) calc(var(--space-10) + 60px); /* significant bottom clearance for action visibility */
+  padding: var(--space-3) var(--space-4) calc(var(--space-10) + 60px); 
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   border-top: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 1024px) {
+  .cardsList {
+    overflow: visible; /* Don't trap scroll on mobile */
+    min-height: auto;
+    padding-bottom: var(--space-6); /* Reduce extra padding from desktop */
+  }
 }
 
 .tabEmpty {
@@ -221,6 +253,20 @@
   flex: 1;
   display: flex;
   overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+  .mapPanel {
+    flex: none;
+    height: 50vh;
+    min-height: 450px;
+    width: auto;
+    margin: 0 var(--space-4) var(--space-8);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
 }
 
 .mapLoading {

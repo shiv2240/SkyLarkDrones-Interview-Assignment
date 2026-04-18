@@ -32,8 +32,8 @@ export default function Header({
   const { user } = useAuth();
   const [logsOpen, setLogsOpen] = useState(false);
 
-  const time = new Date(generatedAt).toLocaleTimeString("en-IN", {
-    hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata",
+  const time = new Date(generatedAt).toLocaleString("en-IN", {
+    day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata",
   });
 
   const isManager = user?.role === "SITE_HEAD" || user?.role === "ADMIN";

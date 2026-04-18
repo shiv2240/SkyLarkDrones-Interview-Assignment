@@ -11,6 +11,12 @@
   overflow: visible; /* Prevent clipping of expanded trace logs and shadows */
 }
 
+@media (max-width: 640px) {
+  .card {
+    padding: var(--space-3);
+  }
+}
+
 .card::before {
   content: "";
   position: absolute;

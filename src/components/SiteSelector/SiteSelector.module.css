@@ -21,6 +21,16 @@
   white-space: nowrap;
 }
 
+@media (max-width: 640px) {
+  .trigger {
+    max-width: none; /* Let it take more space on its dedicated row */
+    width: 100%;
+    font-size: 14px;
+    padding: var(--space-3);
+    justify-content: space-between;
+  }
+}
+
 .trigger:hover:not(:disabled) {
   border-color: var(--border-strong);
   color: var(--text-primary);
@@ -89,6 +99,17 @@
   overflow: hidden;
 }
 
+@media (max-width: 640px) {
+  .dropdown {
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    transform: none;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+}
 .dropdownHeader {
   padding: var(--space-3) var(--space-4);
   font-size: 10px;

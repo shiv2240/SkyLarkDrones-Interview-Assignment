@@ -113,6 +113,12 @@
   margin-bottom: 4px;
 }
 
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .operator {
   font-size: 13px;
   font-weight: 700;
@@ -138,9 +144,6 @@
 }
 
 .categoryTag {
-  position: absolute;
-  top: 16px;
-  right: 16px;
   font-size: 10px;
   font-weight: 800;
   padding: 2px 8px;

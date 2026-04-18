@@ -50,7 +50,9 @@ export class IntelligenceService {
       });
     }
 
-    const anomalousCount = incidents.filter(i => i.type !== "ROUTINE_PATROL").length;
+    const anomalousCount = incidents.filter(
+      (i) => i.type !== "ROUTINE_PATROL",
+    ).length;
     const routineCount = incidents.length - anomalousCount;
 
     return {
@@ -59,8 +61,9 @@ export class IntelligenceService {
       total_signals: incidents.length,
       routine_signals: routineCount,
       anomalous_signals: anomalousCount,
-      critical_count: storylines.filter(s => s.risk === "critical").length,
-      needs_review_count: storylines.filter(s => s.status === "NEEDS_REVIEW").length,
+      critical_count: storylines.filter((s) => s.risk === "critical").length,
+      needs_review_count: storylines.filter((s) => s.status === "NEEDS_REVIEW")
+        .length,
       storylines,
       incidents,
       summary: "Using Local Security Analysis. Spatial patterns identified.",
@@ -115,18 +118,24 @@ export class IntelligenceService {
           }
 
           // Force coordinates from the associated incidents
-          const incidentIds = Array.isArray(s.incidentIds) ? s.incidentIds : (s.incidentIds || "").split(",");
-          const matchingIncidents = site.incidents.filter((inc: any) => incidentIds.includes(inc.id));
-          
-          const lat = matchingIncidents.length > 0 ? matchingIncidents[0].lat : site.lat;
-          const lng = matchingIncidents.length > 0 ? matchingIncidents[0].lng : site.lng;
+          const incidentIds = Array.isArray(s.incidentIds)
+            ? s.incidentIds
+            : (s.incidentIds || "").split(",");
+          const matchingIncidents = site.incidents.filter((inc: any) =>
+            incidentIds.includes(inc.id),
+          );
+
+          const lat =
+            matchingIncidents.length > 0 ? matchingIncidents[0].lat : site.lat;
+          const lng =
+            matchingIncidents.length > 0 ? matchingIncidents[0].lng : site.lng;
 
           return {
             ...s,
             id: s.id || `ai-${siteId}-${idx}-${Date.now()}`,
             risk,
             lat,
-            lng
+            lng,
           };
         });
       }
@@ -142,7 +151,9 @@ export class IntelligenceService {
       });
 
       // Calculate metrics
-      const anomalousCount = site.incidents.filter((i: any) => i.type !== "ROUTINE_PATROL").length;
+      const anomalousCount = site.incidents.filter(
+        (i: any) => i.type !== "ROUTINE_PATROL",
+      ).length;
       const routineCount = site.incidents.length - anomalousCount;
 
       return {
@@ -154,8 +165,12 @@ export class IntelligenceService {
         total_signals: site.incidents.length,
         routine_signals: routineCount,
         anomalous_signals: anomalousCount,
-        critical_count: parsed.storylines.filter((s: any) => s.risk === "critical").length,
-        needs_review_count: parsed.storylines.filter((s: any) => s.status === "NEEDS_REVIEW").length,
+        critical_count: parsed.storylines.filter(
+          (s: any) => s.risk === "critical",
+        ).length,
+        needs_review_count: parsed.storylines.filter(
+          (s: any) => s.status === "NEEDS_REVIEW",
+        ).length,
         greeting: parsed.summary, // Use summary as greeting for now
         center: { lat: site.lat, lng: site.lng },
         droneNestLat: site.droneNestLat,
@@ -173,7 +188,8 @@ export class IntelligenceService {
         operator: site.operator,
         site: site.name,
         raghav_note: site.raghavNote,
-        greeting: "Local security protocols active. AI synchronization degraded.",
+        greeting:
+          "Local security protocols active. AI synchronization degraded.",
         center: { lat: site.lat, lng: site.lng },
         droneNestLat: site.droneNestLat,
         droneNestLng: site.droneNestLng,

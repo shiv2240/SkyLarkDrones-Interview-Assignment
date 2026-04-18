@@ -64,12 +64,21 @@ export default function AuditLogs({ isOpen, onClose }: { isOpen: boolean; onClos
                   <div className={styles.logBody}>
                     <div className={styles.logHeader}>
                       <span className={styles.operator}>{log.operator}</span>
-                      <span className={styles.time}>{new Date(log.timestamp).toLocaleTimeString()}</span>
+                      <div className={styles.headerRight}>
+                        <span className={styles.time}>
+                          {new Date(log.timestamp).toLocaleString("en-IN", { 
+                            day: "2-digit", 
+                            month: "short", 
+                            hour: "2-digit", 
+                            minute: "2-digit" 
+                          })}
+                        </span>
+                        <div className={styles.categoryTag} data-cat={log.category}>{log.category}</div>
+                      </div>
                     </div>
                     <div className={styles.action}>{log.action}</div>
                     <div className={styles.details}>{log.details}</div>
                   </div>
-                  <div className={styles.categoryTag} data-cat={log.category}>{log.category}</div>
                 </div>
               ))}
             </div>
