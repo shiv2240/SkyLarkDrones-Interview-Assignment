@@ -4,7 +4,7 @@ import { IntelligenceService } from "@/lib/services/intelligence.service";
 
 export async function GET(
   request: Request,
-  { params }: { params: { siteId: string } },
+  { params }: { params: Promise<{ siteId: string }> },
 ) {
   const user = getAuthUser(request);
 
