@@ -139,15 +139,15 @@ export class IntelligenceService {
         });
       }
 
-      // Observability: Log the AI action
-      await prisma.auditLog.create({
+      // Observability: Log the AI action (Safe for Read-Only Vercel)
+      prisma.auditLog.create({
         data: {
           action: "AI_SYNTHESIS",
           operator: "SYSTEM",
           details: `Processed ${site.incidents.length} signals for site ${site.name}. Latency: ${response.usage?.total_tokens} tokens used.`,
           category: "AI",
         },
-      });
+      }).catch(e => console.warn("Could not write audit log (Database may be read-only):", e.message));
 
       // Calculate metrics
       const anomalousCount = site.incidents.filter(
@@ -180,11 +180,19 @@ export class IntelligenceService {
         summary: parsed.summary,
       };
     } catch (err: any) {
-      console.error("AI Synthesis Error Details:", err);
+      const errorMessage = err.message || "Unknown AI error";
+      console.error("AI Synthesis Error Details:", errorMessage);
+      
+      if (!process.env.GROQ_API_KEY) {
+        console.warn("GROQ_API_KEY is missing from environment variables.");
+      }
+
       console.warn("AI synthesis failed, falling back to local analysis engine.");
       const fallback = await this.localFallback(siteId, site.incidents);
       return {
         ...fallback,
+        debug_error: errorMessage, // Expose to frontend for debugging
+        ai_error_hint: !process.env.GROQ_API_KEY ? "Missing API Key" : "Check Groq platform logs",
         operator: site.operator,
         site: site.name,
         raghav_note: site.raghavNote,

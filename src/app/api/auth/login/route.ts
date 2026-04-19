@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       { expiresIn: "24h" },
     );
 
-    // Create an audit log asynchronously (don't block the response)
+    // Create an audit log asynchronously (Safe for Read-Only Vercel)
     prisma.auditLog
       .create({
         data: {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
           category: "AUTH",
         },
       })
-      .catch((err) => console.error("Audit Log Error:", err));
+      .catch((err) => console.warn("Could not write audit log (Database may be read-only):", err.message));
 
     return NextResponse.json({
       token,
