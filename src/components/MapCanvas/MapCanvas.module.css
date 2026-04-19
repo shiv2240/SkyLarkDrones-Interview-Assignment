@@ -29,6 +29,7 @@
   box-shadow: 0 0 0 2px hsla(0,0%,100%,0.1), 0 0 12px var(--marker-color, #f59e0b);
   z-index: 2;
   position: relative;
+  animation: pulse-dot 2s infinite;
 }
 
 .markerRing {
@@ -37,8 +38,8 @@
   height: 10px;
   border-radius: 50%;
   background: var(--marker-color, #f59e0b);
-  opacity: 0.4;
-  animation: pulse-ring 2s ease-out infinite;
+  opacity: 0.8;
+  animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
   z-index: 1;
 }
 
@@ -71,10 +72,16 @@
   background: hsl(220, 18%, 11%) !important;
 }
 :global(.leaflet-popup-content) {
-  margin: 0 !important;
+  margin: 12px 16px !important;
+  color: #ffffff !important;
+  font-family: var(--font-sans), system-ui, sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
 }
 :global(.leaflet-popup-close-button) {
   color: hsl(215, 14%, 68%) !important;
+  padding: 8px !important;
 }
 
 /* ── Nest marker ── */
@@ -179,4 +186,26 @@
 .legendLabel {
   color: var(--text-secondary);
   font-size: 10px;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes pulse-ring {
+  0% { transform: scale(0.5); opacity: 0.8; }
+  80%, 100% { transform: scale(5); opacity: 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 8px hsl(195, 90%, 55%)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 15px hsl(195, 100%, 65%)); transform: scale(1.1); }
+}
+
+@keyframes slide-up {
+  from { transform: translate(-50%, 20px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 hsla(0, 0%, 100%, 0.3); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px hsla(0, 0%, 100%, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 hsla(0, 0%, 100%, 0); }
 }
