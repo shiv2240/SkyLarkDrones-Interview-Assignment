@@ -6,7 +6,7 @@ The **6:10 Assistant** is a high-stakes, AI-native intelligence platform designe
 
 ---
 
-## 🚀 Unified Operation Launch
+##  Unified Operation Launch
 The entire platform (Frontend, Backend, and Database) is now consolidated into a single, high-performance Next.js application.
 
 1. **Setup Environment**:
@@ -21,13 +21,13 @@ The entire platform (Frontend, Backend, and Database) is now consolidated into a
 
 ---
 
-## 🌐 Live Deployment
+##  Live Deployment
 The platform is also deployed and can be accessed here:
 **[Live Demo Link](https://sky-lark-drones-interview-assignmen.vercel.app/)**
 
 ---
 
-## 🔐 Testing Credentials
+##  Testing Credentials
 
 | Persona | Email | Security Key (Password) | Role |
 | :--- | :--- | :--- | :--- |
@@ -36,12 +36,26 @@ The platform is also deployed and can be accessed here:
 
 ---
 
-## 📖 The Story
+##  The Story
 Every morning, the site "knows" something happened, but nobody knows the full story. Between raw logs and Maya’s 8:00 AM briefing for Site Head Nisha, there is a gap of uncertainty. This platform fills that gap by deploying an **Autonomous Intelligence Agent** that investigates context, correlates signals, and drafts the morning truth.
 
 ---
 
-## 🕵️‍♂️ Key Features
+##  System Intelligence Deep Dive
+The 6:10 Assistant operates through a **"Cognitive Triage"** loop consisting of three major layers:
+
+### 1. Cognitive Synthesis (Telemetric Correlation)
+Instead of overwhelming the operator with a flat list of logs, our backend identifies clusters of raw signals (e.g., motion events, fence alerts, and badge failures). It passes these clusters to a **Llama-3 model on Groq**, which performs sub-second correlation to identify a central narrative. The result is a **Storyline**: a single card that explains *what* happened, *why* it matters (Risk Score), and the AI's **Agent Reasoning**.
+
+### 2. Spatial Situational Awareness
+Every Storyline is linked 1:1 with physical sensor coordinates. When Maya clicks a card, the system performs a high-precision interpolation (Fly-To) on the **Mapbox layer**. Anomalies are visualized with **Pulsing Tactical Markers**, and the drone dispatch loop is calculated relative to the nearest drone nest, providing instant spatial context to an abstract signal.
+
+### 3. Triage & The "Morning Briefing"
+The workflow concludes with human validation. Maya triages the AI's hypotheses by 'Approving' or 'Discarding' stories. Approved stories are aggregated into the **Morning Briefing**—a condensed executive summary ready for the 8:00 AM meeting—closing the gap between overnight chaos and operational certainty.
+
+---
+
+##  Key Features
 - **AI-First Investigation**: Powered by **Groq (Llama-3.3-70b)**, performing sub-second correlation of raw signals into "Storylines."
 - **Spatial Intelligence**: High-density **Mapbox GL** interface linked 1:1 with physical sensor coordinates.
 - **Drone Simulation**: Imperative flight simulation for real-time thermal/visual recon.
@@ -50,7 +64,7 @@ Every morning, the site "knows" something happened, but nobody knows the full st
 
 ---
 
-## 🛠 Multi-Tier Architecture
+##  Multi-Tier Architecture
 - **Unified Stack**: Next.js 16 (Monolithic App Router Architecture).
 - **Backend Logic**: Next.js Route Handlers (integrated API with JWT & RBAC).
 - **Vercel Optimization**: Implemented dynamic absolute path resolution for SQLite to ensure serverless compatibility.
@@ -60,7 +74,7 @@ Every morning, the site "knows" something happened, but nobody knows the full st
 
 ---
 
-## ✅ Fulfillment of Non-Negotiables
+##  Fulfillment of Non-Negotiables
 
 | Requirement | Implementation Detail |
 | :--- | :--- |
